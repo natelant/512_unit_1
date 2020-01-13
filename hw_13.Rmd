@@ -1,0 +1,44 @@
+---
+title: "HW 13"
+author: "Nate Lant"
+date: "1/14/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+4 7 15 19 21 22
+
+## 13.4 
+Why is there so little interest in how the mean response is associated with blocks in a randomized block experiment?
+
+
+## 13.7 
+If the F-test for treatments is not signiﬁcant but the t-test for one of the contrasts is signiﬁcant, is it proper to report the contrast?
+
+## 13.15
+```{r setup.15, include=F}
+data_blood <- read_csv("data/case1102.csv") %>% 
+  mutate(Time = as_factor(Time),
+         ratio = log(Brain/Liver))
+```
+
+(a) Ignore the covariates and use an analysis of variance procedure to ﬁt the data. Fit a model that includes interaction terms; plot the residuals versus the ﬁtted values. 
+
+```{r 15.a, echo=F}
+glm(ratio ~ Time + Treatment, data = data_blood)
+```
+ 
+(b) Test whether there is an interactive effect of treatment and sacriﬁce time. What are the F-statistic, the degrees of freedom, and the p-value? 
+ 
+(c) If there are no interactive effects, test whether there are main effects of treatment and sacriﬁce time. 
+
+(d) Complete the analysis by describing the effects of treatment and sacriﬁce time, either by estimating the appropriate contrasts or by using a regression procedure with indicator variables to model treatment (one indicator) and sacriﬁce time (three indicators). 
+
+## 13.19
+## 13.21
+hint: class has to be a random effect. 
+hint: gain is the response
