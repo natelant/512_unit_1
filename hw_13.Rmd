@@ -9,15 +9,20 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+library(stats)
+library(pander)
 ```
-4 7 15 19 21 22
 
 ## 13.4 
 Why is there so little interest in how the mean response is associated with blocks in a randomized block experiment?
 
+Blocks are formed to compare treatments, and we aren't as interested in block differences as we are in treatment differences.
+
 
 ## 13.7 
 If the F-test for treatments is not signiﬁcant but the t-test for one of the contrasts is signiﬁcant, is it proper to report the contrast?
+
+Before reporting, be weary of data snooping, unless the contrast was planned.
 
 ## 13.15
 ```{r setup.15, include=F}
@@ -29,16 +34,38 @@ data_blood <- read_csv("data/case1102.csv") %>%
 (a) Ignore the covariates and use an analysis of variance procedure to ﬁt the data. Fit a model that includes interaction terms; plot the residuals versus the ﬁtted values. 
 
 ```{r 15.a, echo=F}
-glm(ratio ~ Time + Treatment, data = data_blood)
+lm.blood <- lm(ratio ~ Time + Treatment + Time*Treatment, data = data_blood)
+aov.blood <- anova.mlm(ratio ~ Time + Treatment + Time*Treatment, data = data_blood)
+
+
+texreg::screenreg(lm.blood)
+
+plot(lm.blood, 1)
+
 ```
  
 (b) Test whether there is an interactive effect of treatment and sacriﬁce time. What are the F-statistic, the degrees of freedom, and the p-value? 
+
+`r summary(lm.blood)`
  
 (c) If there are no interactive effects, test whether there are main effects of treatment and sacriﬁce time. 
 
+None of the interactions in the nonadditive model are significant. Below is a test of the additive model (without interactions)
+
+```{r additive.15, echo=F}
+add <- lm(ratio ~ Time + Treatment, data = data_blood)
+
+summary(add) %>% pander()
+
+```
+
 (d) Complete the analysis by describing the effects of treatment and sacriﬁce time, either by estimating the appropriate contrasts or by using a regression procedure with indicator variables to model treatment (one indicator) and sacriﬁce time (three indicators). 
+
+The treatment coefficient is negative and the response treatment is BD which means that if the treatment is NS, there is likely to be an decrease of 0.797 in ratio of brain count to liver count results.
 
 ## 13.19
 ## 13.21
 hint: class has to be a random effect. 
 hint: gain is the response
+
+## 13.22
