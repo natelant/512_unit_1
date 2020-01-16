@@ -12,6 +12,7 @@ library(tidyverse)
 library(stats)
 library(pander)
 library(texreg)
+library(lmerTest)
 ```
 
 ## 13.4 
@@ -62,11 +63,75 @@ summary(add) %>% pander()
 The treatment coefficient is negative and the response treatment is BD which means that if the treatment is NS, there is likely to be an decrease of 0.797 in ratio of brain count to liver count results which is significant on the p < 0.001 level.
 
 ## 13.19
+A 1989 study investigated the effect of heredity and environment on intelligence. From adoption registers in France, researchers selected samples of adopted children whose biological parents and adoptive parents came from either the very highest or the very lowest socioeconomic status (SES) categories (based on years of education and occupation).
+
+The model below shows two models. In the first model, the interaction is not significant. The second model does not contain the interaction.
+```{r 13.setup, echo=F, message=F}
+# data
+child <- read_csv("data/ex1319.csv")
+
+# model
+fit.1 <- lm(IQ ~ Adoptive + Biological + Adoptive*Biological, data = child)
+fit.2 <- lm(IQ ~ Adoptive + Biological, data = child)
+
+screenreg(list(fit.1, fit.2))
+```
+
+Does the difference in mean scores for those with high and low SES biological parents depend on whether the adoptive parents were high or low SES? 
+
+**no. the interaction perameter is not significant**
+
+If not, how much is the mean IQ score affected by the SES of adoptive parents, and how much is it affected by the SES of the biological parents? 
+
+```{r confint.19, echo=F}
+# calculate conf intervals
+confint(fit.2) %>%
+  pander(caption = "Confidence intervals of Parameters from Model 2 with 95% conf.")
+```
+
+**According to model 2 above, IQ scores will be lower by 11.62 if Adoptive parents are from the low SES and by 15.58 if biological parents are from the low SES.**
+
+Is one of these effects larger than the other? Analyze the data and write a report of the findings.
 
 
+**Model 2 shows that the average score is 119.39 if both adoptive and biological parents are from the high SES. However, this score goes down if their adoptive parents are low SES by 11.62 (between 3 and 20) and down another 15.58 (between 6 and 24) if the biological parents are from the low SES. There is no mention of randomness in selection and assignment of the subjects, and therefore results cannot be inferred to the population.**
 
 ## 13.21
-hint: class has to be a random effect. 
-hint: gain is the response
+
+
+```{r scores.setup, echo=F, messages=F}
+# data
+school <- read_csv("data/ex1321.csv") %>%
+  mutate(Student = as.character(Student),
+         Grade = as_factor(Grade))
+```
+
+```{r plot, echo=F}
+school %>%
+  ggplot(aes(x = Treatment, y = Gain, colour = Grade, fill = Grade)) +
+  geom_smooth(method = "lm", se = F) +
+  geom_point() +
+  geom_jitter(width = 0.1)
+```
+
+```{r model.setup.21, echo=F}
+
+# model to test response var Gain
+model.0 <- lm(Gain ~ Treatment, data = school)
+model.1 <- glm(Gain ~ Treatment + Grade + Treatment*Grade, data = school)
+model.2 <- lm(Gain ~ Treatment + Grade, data = school)
+
+summary(model.2)
+screenreg(list(model.0, model.1, model.2))
+```
 
 ## 13.22
+random effect of the class block is meant to capture all the influences of classes on Gain scores - whether we observed those influences explicitly or not, whether those influences are big or small etc. It could be many, many teeny-tiny influences that, when combined, affect the test scores and that’s what we are hoping to control for with a mixed effects test.
+
+```{r random, echo=F}
+library(lme4)
+
+rdm.0 <- lmer(Gain ~ (1|Class) + Treatment, data = school)
+summary(rdm.0)
+
+```
