@@ -1,0 +1,23 @@
+---
+title: "HW 14"
+author: "Nate Lant"
+date: "1/21/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 2
+
+## Problem 4
+
+## Problem 11
+
+## Problem 15
+
+## Problem 20
+
+
+

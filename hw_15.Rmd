@@ -1,0 +1,70 @@
+---
+title: "HW 15"
+author: "Nate Lant"
+date: "1/23/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+```{r setup, include=F}
+library(tidyverse)
+library(stats)
+library(tseries)
+library(forecast)
+```
+
+## Problem 2
+
+## Problem 5
+
+## Problem 11 El Nino and Hurricanes. 
+Reconsider the El Ni˜no and Hurricane data set from Exercise 10.28.
+
+```{r nino.data, echo=F}
+nino <- read_csv("data/ex1028.csv") %>%
+  mutate(Temperature = as_factor(Temperature),
+         WestAfrica = as_factor(WestAfrica),
+         )
+```
+
+Regress the log of the storm index on temperature and the indicator variable for West African wetness
+and retain the residuals. 
+
+```{r nino.model, echo=F}
+nino.fit <- glm(log(StormIndex) ~ Temperature + WestAfrica, data = nino)
+summary(nino.fit)
+```
+
+#### (a) Construct a lag plot of the residuals, as in Display 15.5. 
+```{r lag.plot, echo=F}
+# first save the residuals, then create a lag column
+
+# save the residuals
+resid.nino <- resid(nino.fit)
+#create new columns
+nino <- nino %>%
+  mutate(residuals = resid.nino,
+         resid.lag = lag(residuals))
+# pipe into ggplot
+nino %>% ggplot(aes(x = resid.lag, y = residuals)) +
+  geom_point()
+```
+
+Because the lag plot shows even spread, then there is randomness in the data.
+
+#### (b) Construct a partial autocorrelation function plot of the residuals. 
+
+```{r pafc, echo=F}
+ggPacf(nino$residuals, 25) +
+  ggtitle("Partial Autocorrelation Function Plot")
+```
+
+#### (c) Is there any evidence of autocorrelation? How many lags?
+No, all of the lags are within the 95% confidence interval.
+
+## Problem 15
+
+## Problem 16
+
+
+
