@@ -18,9 +18,9 @@ library(forecast)
 ## Problem 5
 
 ## Problem 11 El Nino and Hurricanes. 
-Reconsider the El Ni˜no and Hurricane data set from Exercise 10.28.
+Reconsider the El Nino and Hurricane data set from Exercise 10.28.
 
-```{r nino.data, echo=F}
+```{r nino.data, echo=F, message=F}
 nino <- read_csv("data/ex1028.csv") %>%
   mutate(Temperature = as_factor(Temperature),
          WestAfrica = as_factor(WestAfrica),
@@ -36,7 +36,7 @@ summary(nino.fit)
 ```
 
 #### (a) Construct a lag plot of the residuals, as in Display 15.5. 
-```{r lag.plot, echo=F}
+```{r lag.plot, echo=F, warning=F}
 # first save the residuals, then create a lag column
 
 # save the residuals
@@ -62,7 +62,22 @@ ggPacf(nino$residuals, 25) +
 #### (c) Is there any evidence of autocorrelation? How many lags?
 No, all of the lags are within the 95% confidence interval.
 
-## Problem 15
+## Problem 15 Lynx Trappings and Sunspots. 
+Many animal populations experience approximately 10-year cycles of boom and bust. An example is the 
+Canadian lynx. Annual numbers of lynx trapped in the Mackenzie River district of northwest Canada from 
+1821 to 1934 appear in the first five lines of the display below.
+
+```{r display, echo=F, message=F}
+lynx <- read_csv("data/ex1515.csv") %>%
+  mutate(Year = as_factor(Year))
+
+head(lynx, 5)
+```
+
+One conceivable explanation is that these fluctuations are related to solar activity, as described by  
+the sunspot series. Is there evidence that lynx numbers are related to sunspot activity in the same 
+year or to sunspot activity in the previous one or two years?
+
 
 ## Problem 16
 
