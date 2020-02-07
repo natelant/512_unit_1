@@ -1,0 +1,32 @@
+---
+title: "hw_16"
+author: "Nate Lant"
+date: "1/30/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 15 - (in class)
+
+```{r setitup, echo=F}
+# read in data but rename the years "M/V:89" to 1989
+state_data <- read_csv("data/ex1615.csv",
+                       col_names = c("State", "1989", 1996:1999),
+                       skip = 1) %>%
+  # then make year a variable (tidy)
+  gather(Year, Ratio, -State) %>%
+  mutate(Year = as.double(Year)) 
+
+# filter to just the years we need to look at.
+state_data %>%
+  filter(Year == "1989" |
+         Year == "1999")
+```
+
+## Problem 19 - The Rats
+The dependent variable is number of successes. Other variables include student, block, treatment, and day. Treatment and Relax are highly correlated. 
