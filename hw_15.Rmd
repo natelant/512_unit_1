@@ -11,13 +11,18 @@ library(tidyverse)
 library(stats)
 library(tseries)
 library(forecast)
+library(lmerTest)
 ```
 
-## Problem 2
+## Problem 2 - Can slope predict global warming?
+This is a question of serial correlation, which is when a variable is affected by the lagged version of itself.
+If serial correlation is present, then the results (including tests and confidence intervals) can be misleading.
 
-## Problem 5
+## Problem 5 - Breakfast effects
+Experiment c) is the best because randomization accounts for a lot of variables that may be lurking.
+However, there could be serial correlation because one day's accomplishment should be similar to the previous day.
 
-## Problem 11 El Nino and Hurricanes. 
+## Problem 11 - El Nino and Hurricanes. 
 Reconsider the El Nino and Hurricane data set from Exercise 10.28.
 
 ```{r nino.data, echo=F, message=F}
@@ -69,17 +74,97 @@ Canadian lynx. Annual numbers of lynx trapped in the Mackenzie River district of
 
 ```{r display, echo=F, message=F}
 lynx <- read_csv("data/ex1515.csv") %>%
-  mutate(Year = as_factor(Year))
+  mutate(#Year = as_factor(Year),
+         log_Lynx = log(Lynx),
+         log_Sunspots = log(Sunspots),
+         prev_year = lag(Sunspots),
+         prev_2 = lag(prev_year))
 
-head(lynx, 5)
+lynx %>%
+  select(Year, Lynx, Sunspots) %>%
+  head(5)
 ```
 
 One conceivable explanation is that these fluctuations are related to solar activity, as described by  
 the sunspot series. Is there evidence that lynx numbers are related to sunspot activity in the same 
 year or to sunspot activity in the previous one or two years?
 
+#### Check Assumptions 
 
-## Problem 16
+Check to see if the distribution in normal. According to the histogram below, a transformation will be necessary. Let's use log(Lynx).
+
+```{r assumptions.lynx, echo=F}
+lynx %>% ggplot(aes(x = (Lynx))) +
+  geom_histogram()
+
+lynx %>%
+  select(Year, log_Lynx, log_Sunspots) %>%
+  gather(Type, Value, -Year) %>% 
+  #mutate(Year = as.double(Year)) %>%
+  # plot
+  ggplot(aes(x = Year, y = Value, color = Type)) +
+  geom_line()
+
+```
+
+Here is the model. The equation is 
+$$ log(Lynx) = \beta_0 + \beta_1*Sunspots + \beta_2*prev_1 + \beta_3*prev_2   $$
+
+```{r spots.years, echo=F}
+fit_1 <- glm(log_Lynx ~ log_Sunspots + prev_year + prev_2, data = lynx, na.action=na.exclude)
+summary(fit_1)
+```
+
+Now from the autocorrelation plot, we see that the last two years are highly significant. This plot shows that the number of lynx is highly correlated with the number of sunspots in the year before and two years before.
+
+```{r pafc.lynx, echo=F}
+# store residuals
+resid_lynx <- resid(fit_1)
+
+# add residual column to the data set
+lynx <- lynx %>%
+  mutate(Residuals = resid_lynx)
+
+# ggplot autocorrelation plot
+ggPacf(lynx$Residuals) +
+  ggtitle("Partial Autocorrelation Function Plot of Lynx sunspots over the years")
+```
+
+## Problem 16 - Firearms and Motor vehicles
+ Is there evidence of an increasing or decreasing trend in firearm deaths over this
+period? What is the rate of increase or decrease? Is there evidence of an increasing or decreasing
+trend in motor vehicle deaths over this period? What is the rate of increase or decrease?
+
+```{r data.firearms, echo=F}
+# bring in the data from problem 16
+data_16 <- read_csv("data/ex1516.csv")
+
+clean <- data_16 %>% 
+  gather(Type, Value, -Year) 
+
+#build scatter plot
+clean %>%
+  ggplot(aes(x = Year, y = Value, color = Type)) +
+  geom_line() +
+  labs(y = "Deaths (in thousands)") +
+  geom_smooth(method = "lm")
+```
+
+It looks like there are some trends according to the scatterplot, but let's use a model to see if these slopes are significant.
+
+```{r guns.cars.model, echo=F}
+# this is a try at an interaction
+# The output is the same as running two regressions. The slope is
+# 0.456 (if firearms) and 0.456-0.945=-0.489 (if motordeaths)
+glm(Value ~ Year*Type, data = clean) %>%
+  summary() %>% pander()
+
+
+```
+
+Here the output shows that the rate of firearm deaths is increasing by $ 0.456*1000=$ **456** deaths
+per year and the rate of motor vehicle deaths is decreasing by $(0.456-0.945)*1000=$ = **489** deaths
+per year. These rates are significant on the p<0.001 level.
 
 
 
