@@ -2,7 +2,9 @@
 title: "HW 13"
 author: "Nate Lant"
 date: "1/14/2020"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -97,36 +99,41 @@ Is one of these effects larger than the other? Analyze the data and write a repo
 **Model 2 shows that the average score is 119.39 if both adoptive and biological parents are from the high SES. However, this score goes down if their adoptive parents are low SES by 11.62 (between 3 and 20) and down another 15.58 (between 6 and 24) if the biological parents are from the low SES. There is no mention of randomness in selection and assignment of the subjects, and therefore results cannot be inferred to the population.**
 
 ## 13.21
+Analyze the data to summarize the evidence that teachers’ expectations affect student test score gains. Write a
+statistical report of your conclusions.
 
+The research question is asking if teachers' expectations affect test score gains.
 
-```{r scores.setup, echo=F, messages=F}
+```{r scores.setup, include=F, messages=F, warning=F}
 # data
 school <- read_csv("data/ex1321.csv") %>%
   mutate(Student = as.character(Student),
          Grade = as_factor(Grade))
 ```
 
-```{r plot, echo=F}
-school %>%
-  ggplot(aes(x = Treatment, y = Gain, colour = Grade, fill = Grade)) +
-  geom_smooth(method = "lm", se = F) +
-  geom_point() +
-  geom_jitter(width = 0.1)
-```
+The first model,  Model 1, shows the base model of Gain as a function of Treatment only. Model 2 shows the Treatment and Grade interaction. It appears that the interaction is significant on the p-value <0.05 level, therefore we will use the nonadditive model.
 
 ```{r model.setup.21, echo=F}
-
 # model to test response var Gain
 model.0 <- lm(Gain ~ Treatment, data = school)
 model.1 <- glm(Gain ~ Treatment + Grade + Treatment*Grade, data = school)
-model.2 <- lm(Gain ~ Treatment + Grade, data = school)
 
-summary(model.2)
-screenreg(list(model.0, model.1, model.2))
+summary(model.1)
+screenreg(list(model.0, model.1))
 ```
 
+Model 2 shows that as students get older, the effect is less significant. For first graders, they are likely to have a score 15.3 points higher if their teachers expect them to excel. This 15.3 increase will decrease by 5 for second graders, 6.9 for third graders, 9.7 for fourth graders, and 1.3 for 6th graders. The confidence intervals are reported below.
+
+```{r pyg.conf, echo=F, message=F}
+# calculate conf intervals
+confint(model.1) %>%
+  pander(caption = "Confidence intervals of Gain scores from Model 2 with 95% conf.")
+```
+
+The problem statement says that students were assigned by a chance mechanism (I will assume that means randomly) to the "likely to excel" treatment group. This means that we can infer causality, however nothing was mentioned that the classes or students were randomly chosen. We cannot infer to the larger population. 
+
 ## 13.22
-random effect of the class block is meant to capture all the influences of classes on Gain scores - whether we observed those influences explicitly or not, whether those influences are big or small etc. It could be many, many teeny-tiny influences that, when combined, affect the test scores and that’s what we are hoping to control for with a mixed effects test.
+Random effect of the class block is meant to capture all the influences of classes on Gain scores - whether we observed those influences explicitly or not, whether those influences are big or small etc. It could be many, many teeny-tiny influences that, when combined, affect the test scores and that’s what we are hoping to control for with a mixed effects test.
 
 ```{r random, echo=F}
 library(lme4)
