@@ -11,6 +11,12 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Problem 2
+
+## Problem 4
+
+## Problem 14
+
 ## Problem 15 - (in class)
 
 ```{r setitup, echo=F}
@@ -27,6 +33,9 @@ state_data %>%
   filter(Year == "1989" |
          Year == "1999")
 ```
+
+## Problem 18
+
 
 ## Problem 19 - The Rats
 The dependent variable is number of successes. Other variables include student, block, treatment, and day. Treatment and Relax are highly correlated. 
